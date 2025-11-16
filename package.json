@@ -1,0 +1,33 @@
+{
+  "name": "token-22-metadata",
+  "version": "1.0.0",
+  "description": "Create Solana Token-22 tokens with metadata support",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "create-token": "tsx src/createToken.ts",
+    "initialize-metadata": "tsx src/initializeMetadata.ts",
+    "create-ata": "tsx src/createATA.ts",
+    "mint": "tsx src/mint.ts"
+  },
+  "keywords": [
+    "solana",
+    "spl-token",
+    "token-22",
+    "metadata"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2",
+    "@solana/spl-token": "^0.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
+
