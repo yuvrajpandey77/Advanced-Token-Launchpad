@@ -1,5 +1,22 @@
 # Quick Start Guide
 
+
+# Create a token with metadata
+npm run create-token -- --name "Token Name" --symbol "SYMBOL" --metadata-uri "https://..." --amount 1000
+
+# Initialize metadata for existing token
+npm run initialize-metadata -- <mint-address> "Name" "Symbol" "https://metadata-uri"
+
+# Create Associated Token Account
+npm run create-ata -- <mint-address>
+
+# Mint tokens
+npm run mint -- <mint-address> <amount> [recipient-address]
+
+# General dev script
+npm run dev
+
+
 ## Exact Commands from Context
 
 ### 1. Create Token with Metadata Enabled
