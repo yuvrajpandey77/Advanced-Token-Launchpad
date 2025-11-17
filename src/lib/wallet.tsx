@@ -7,7 +7,7 @@ import {
   SolflareWalletAdapter,
   TorusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { config } from '@/config.ts';
+import { config } from '@/config';
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
