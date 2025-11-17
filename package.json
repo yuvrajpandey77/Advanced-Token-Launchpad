@@ -32,9 +32,6 @@
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "three": "^0.169.0",
-    "@react-three/fiber": "^8.17.10",
-    "@react-three/drei": "^9.114.3",
     "gsap": "^3.12.5",
     "@gsap/react": "^2.1.1"
   },

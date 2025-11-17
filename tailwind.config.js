@@ -19,5 +19,8 @@ export default {
     },
   },
   plugins: [],
+  corePlugins: {
+    scrollBehavior: true,
+  },
 }
 
