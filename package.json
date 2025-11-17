@@ -13,7 +13,8 @@
     "mint": "tsx src/mint.ts",
     "dev:web": "vite",
     "build:web": "vite build",
-    "preview:web": "vite preview"
+    "preview:web": "vite preview",
+    "vercel-build": "npm run build:web"
   },
   "keywords": [
     "solana",

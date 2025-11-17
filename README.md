@@ -1,220 +1,212 @@
-# Token-22 with Metadata
+# 🚀 Advanced Token Launchpad
 
-A comprehensive toolkit for creating Solana Token-22 tokens with metadata support.
+Create and mint Token-2022 tokens on Solana with a beautiful, lag-free UI.
 
-## 🚀 Features
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yuvrajpandey77/Advanced-Token-Launchpad)
 
-- Create Token-22 tokens with metadata enabled
-- Initialize on-chain metadata
-- Create Associated Token Accounts (ATA)
-- Mint tokens
-- Full TypeScript support
-- CLI and programmatic interfaces
+## ✨ Features
 
-## 📋 Prerequisites
+- 🪙 **Create Token-2022 Tokens** - Deploy SPL Token-2022 mints
+- 💰 **Mint Tokens** - Mint tokens to any address
+- 🔗 **Multi-Network** - Support for Devnet and Mainnet
+- 🎨 **Beautiful UI** - Smooth, lag-free gradient design
+- 📱 **Responsive** - Works on desktop and mobile
+- ⚡ **Fast** - Optimized bundle with zero lag
+- 🔐 **Secure** - Client-side only, you control your keys
 
-1. **Solana CLI Tools**: Install the Solana CLI and SPL Token CLI
-   ```bash
-   sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
-   export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-   
-   # Install SPL Token CLI
-   cargo install spl-token-cli
-   ```
+## 🏗️ Tech Stack
 
-2. **Node.js**: Version 18 or higher
+- **React 18** + **TypeScript**
+- **Vite** - Lightning-fast build tool
+- **Solana Web3.js** - Blockchain interaction
+- **SPL Token** - Token-2022 support
+- **Wallet Adapter** - Multiple wallet support
+- **Tailwind CSS** - Styling
+- **GSAP** - Smooth animations
 
-3. **Wallet**: A Solana wallet with some SOL for transaction fees
+## 🚀 Quick Start
 
-## 🛠️ Installation
+### Prerequisites
+
+- Node.js 18+ and npm
+- A Solana wallet (Phantom, Solflare, etc.)
+- Some SOL for transaction fees
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yuvrajpandey77/Advanced-Token-Launchpad.git
+cd Advanced-Token-Launchpad
+
 # Install dependencies
 npm install
 
-# Build TypeScript
-npm run build
+# Start development server
+npm run dev:web
 ```
 
-## ⚙️ Configuration
+Visit `http://localhost:3000` 🎉
 
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
+## 📦 Build & Deploy
 
-2. Configure your environment variables:
-   ```bash
-   # Set your RPC endpoint
-   RPC_URL=https://api.devnet.solana.com  # or mainnet-beta
-   
-   # Set your wallet (choose one):
-   # Option 1: Private key as JSON array
-   WALLET_PRIVATE_KEY=[123,45,67,...]
-   
-   # Option 2: Path to keypair file
-   KEYPAIR_PATH=~/.config/solana/id.json
-   ```
+### Local Production Build
 
-3. Set your Solana CLI config:
-   ```bash
-   solana config set --url devnet  # or mainnet-beta
-   solana config set --keypair ~/.config/solana/id.json
-   ```
+```bash
+npm run build:web
+npm run preview:web
+```
+
+### Deploy to Vercel
+
+#### Option 1: One-Click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yuvrajpandey77/Advanced-Token-Launchpad)
+
+#### Option 2: Manual Deployment
+
+1. Push your code to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Use these settings:
+   - **Framework:** Other
+   - **Build Command:** `npm run vercel-build`
+   - **Output Directory:** `dist-web`
+   - **Install Command:** `npm install`
+4. Click "Deploy"
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 
 ## 📖 Usage
 
-### Quick Start (All-in-One)
+### Creating a Token
 
-Create a token with metadata in one command:
+1. Connect your Solana wallet
+2. Switch to your desired network (Devnet/Mainnet)
+3. Fill in token details:
+   - Name (e.g., "My Token")
+   - Symbol (e.g., "MTK")
+   - Decimals (default: 9)
+   - Initial Supply (optional)
+   - Metadata URI
+4. Click "Create Token"
+5. Approve the transaction in your wallet
+6. Save the mint address!
 
-```bash
-npm run create-token -- \
-  --name "100xx" \
-  --symbol "100xxx" \
-  --metadata-uri "https://cdn.100xdevs.com/metadata.json" \
-  --amount 1000
-```
+### Minting Tokens
 
-### Step-by-Step
+1. Connect your wallet (must be the mint authority)
+2. Go to "Mint Tokens" tab
+3. Enter:
+   - Mint address
+   - Amount to mint
+   - Recipient address (optional)
+4. Click "Mint Tokens"
+5. Approve the transaction
 
-#### 1. Create Token with Metadata Enabled
+## 🛠️ CLI Tools
 
-```bash
-spl-token --program-id TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb create-token --enable-metadata
-```
-
-This will output a mint address like: `pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK`
-
-#### 2. Initialize Metadata
-
-```bash
-npm run initialize-metadata -- \
-  pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK \
-  "100xx" \
-  "100xxx" \
-  "https://cdn.100xdevs.com/metadata.json"
-```
-
-Or using CLI directly:
-```bash
-spl-token initialize-metadata \
-  pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK \
-  "100xx" \
-  "100xxx" \
-  "https://cdn.100xdevs.com/metadata.json"
-```
-
-#### 3. Create Associated Token Account (ATA)
+The project also includes CLI tools for advanced users:
 
 ```bash
-npm run create-ata -- pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK
+# Create a new token
+npm run create-token
+
+# Initialize metadata for existing token
+npm run initialize-metadata -- <mint-address> "Name" "Symbol" "https://uri"
+
+# Mint tokens
+npm run mint
 ```
 
-Or using CLI directly:
-```bash
-spl-token create-account pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK
-```
-
-#### 4. Mint Tokens
-
-```bash
-npm run mint -- pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK 1000
-```
-
-Or using CLI directly:
-```bash
-spl-token mint pXfZ6Hg2s78m1iSRVsdzos9TmfkqkQdv5MmQrr77ZQK 1000
-```
-
-## 📝 Metadata Format
-
-The metadata JSON should follow this format:
-
-```json
-{
-  "name": "Token x",
-  "symbol": "Token x",
-  "description": "This is an example fungible token for demonstration purposes.",
-  "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSg600Xa4ws6jp54kMDNGYF232lIhY51QJqEA&s"
-}
-```
-
-Example metadata URL: `https://cdn.100xdevs.com/metadata.json`
-
-## 🔍 Verify Token
-
-After minting, check your wallet to see the token with its metadata. The token should display:
-- Name: "100xx"
-- Symbol: "100xxx"
-- Image from the metadata JSON
-- Description
-
-## 📚 Scripts
-
-- `npm run create-token` - Create token with metadata (all-in-one)
-- `npm run initialize-metadata` - Initialize metadata for existing token
-- `npm run create-ata` - Create Associated Token Account
-- `npm run mint` - Mint tokens to ATA
-- `npm run build` - Build TypeScript
-- `npm run dev` - Run development mode
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
-.
 ├── src/
-│   ├── index.ts              # Main CLI interface
-│   ├── createToken.ts        # Token creation script
-│   ├── initializeMetadata.ts # Metadata initialization
-│   ├── createATA.ts          # ATA creation
-│   ├── mint.ts               # Token minting
-│   ├── types.ts              # TypeScript types
-│   └── utils/
-│       ├── connection.ts     # Solana connection utilities
-│       └── keypair.ts        # Keypair loading utilities
-├── package.json
-├── tsconfig.json
-└── README.md
+│   ├── components/         # React components
+│   │   ├── MintForm.tsx
+│   │   ├── TokenCreationForm.tsx
+│   │   └── ui/
+│   ├── services/           # Business logic
+│   │   ├── createToken.ts
+│   │   └── mint.ts
+│   ├── config/             # Configuration
+│   ├── App.tsx             # Main app
+│   └── main.tsx            # Entry point
+├── dist-web/              # Build output
+├── vercel.json            # Vercel config
+├── vite.config.ts         # Vite config
+└── package.json           # Dependencies
 ```
 
-## 🔐 Security Notes
+## 🔧 Configuration
 
-- Never commit your `.env` file or private keys
-- Use environment variables or secure key management
-- Test on devnet before using mainnet
-- Keep your keypair file secure
+### RPC Endpoints
 
-## 🌐 Networks
+Default public endpoints are used. For production, configure custom RPC URLs:
 
-- **Devnet**: `https://api.devnet.solana.com` (for testing)
-- **Mainnet**: `https://api.mainnet-beta.solana.com` (production)
+Create `.env` file:
+
+```env
+VITE_SOLANA_RPC_MAINNET=https://your-mainnet-rpc.com
+VITE_SOLANA_RPC_DEVNET=https://your-devnet-rpc.com
+```
+
+### Network Selection
+
+Users can toggle between Devnet and Mainnet using the network switch in the UI.
+
+## 🎨 Performance Optimizations
+
+- ✅ Removed heavy Three.js dependencies (-63 packages)
+- ✅ Lightweight CSS gradients instead of WebGL shaders
+- ✅ Code splitting and tree shaking
+- ✅ Optimized animations with GSAP
+- ✅ Fast Vite build process
+- ✅ Production bundle < 1MB gzipped
 
 ## 🐛 Troubleshooting
 
-### Insufficient Balance
-Make sure your wallet has enough SOL for transaction fees (typically 0.01-0.1 SOL).
+### "Insufficient funds" Error
+- Ensure you have enough SOL for transaction fees (≈0.01 SOL)
 
-### CLI Not Found
-Ensure `spl-token` is installed and in your PATH:
-```bash
-which spl-token
-cargo install spl-token-cli
-```
+### "Not the mint authority" Error
+- You must use the wallet that created the token to mint
 
-### Transaction Failed
-- Check your network connection
-- Verify you have sufficient balance
-- Ensure the RPC endpoint is correct
-- Check transaction logs in Solana Explorer
+### Wallet Won't Connect
+- Refresh the page
+- Check if wallet extension is installed
+- Try a different wallet
 
-## 📖 References
+### Build Fails on Vercel
+- Check that `vercel.json` exists
+- Verify output directory is `dist-web`
+- Clear Vercel build cache
 
-- [Solana Token Extensions](https://spl.solana.com/token-extensions)
-- [SPL Token CLI Documentation](https://spl.solana.com/token)
-- [Token-2022 Program](https://spl.solana.com/token-2022)
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## 📄 License
 
-MIT
+MIT License - see [LICENSE](LICENSE)
 
+## 🔗 Links
+
+- [Solana Documentation](https://docs.solana.com)
+- [SPL Token Program](https://spl.solana.com/token)
+- [Token-2022 Extensions](https://spl.solana.com/token-2022)
+
+## 💡 Support
+
+For issues and questions:
+- Open an [Issue](https://github.com/yuvrajpandey77/Advanced-Token-Launchpad/issues)
+- Check [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment help
+
+---
+
+Built with ❤️ on Solana
