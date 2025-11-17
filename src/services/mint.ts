@@ -11,7 +11,7 @@ import {
   getMint,
 } from '@solana/spl-token';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { config } from '@/config';
+import { config } from '@/config.ts';
 
 export interface MintResult {
   success: boolean;
