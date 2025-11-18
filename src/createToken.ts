@@ -1,6 +1,10 @@
 import { execSync } from 'child_process';
-import { createConnection } from './utils/connection.js';
+import { createConnection, Network } from './utils/connection.js';
 import { loadKeypair } from './utils/keypair.js';
+import { loadEnv } from './utils/loadEnv.js';
+
+// Load environment variables from .env file
+loadEnv();
 
 interface TokenCreationOptions {
   name: string;
@@ -8,10 +12,11 @@ interface TokenCreationOptions {
   metadataUri: string;
   amount?: number;
   decimals?: number;
+  network?: Network;
 }
 
 async function createTokenWithMetadata(options: TokenCreationOptions) {
-  const { name, symbol, metadataUri, amount = 1000, decimals = 9 } = options;
+  const { name, symbol, metadataUri, amount = 1000, decimals = 9, network } = options;
 
   console.log('🚀 Creating Token-22 with metadata...\n');
   console.log('Configuration:');
@@ -19,11 +24,30 @@ async function createTokenWithMetadata(options: TokenCreationOptions) {
   console.log(`  Symbol: ${symbol}`);
   console.log(`  Metadata URI: ${metadataUri}`);
   console.log(`  Amount: ${amount}`);
-  console.log(`  Decimals: ${decimals}\n`);
+  console.log(`  Decimals: ${decimals}`);
+  console.log(`  Network: ${network || 'devnet (default)'}\n`);
 
   try {
-    const connection = createConnection();
+    const connection = createConnection(undefined, network);
     const payer = loadKeypair();
+    
+    // Set Solana CLI config to match network if specified
+    if (network === 'mainnet' || network === 'mainnet-beta') {
+      try {
+        execSync('solana config set --url mainnet-beta', { stdio: 'pipe' });
+        console.log('✅ Solana CLI configured for mainnet-beta\n');
+      } catch (error) {
+        console.warn('⚠️  Warning: Could not set Solana CLI config. Make sure Solana CLI is installed.');
+        console.warn('   You can manually set it with: solana config set --url mainnet-beta\n');
+      }
+    } else {
+      try {
+        execSync('solana config set --url devnet', { stdio: 'pipe' });
+        console.log('✅ Solana CLI configured for devnet\n');
+      } catch (error) {
+        // Silently fail if Solana CLI is not installed or config fails
+      }
+    }
 
     console.log('Payer:', payer.publicKey.toBase58());
     console.log('Network:', connection.rpcEndpoint);
@@ -112,9 +136,24 @@ Options:
   --metadata-uri <uri>       Metadata JSON URI (default: "https://cdn.100xdevs.com/metadata.json")
   --amount <amount>          Amount to mint (default: 1000)
   --decimals <decimals>      Token decimals (default: 9)
+  --network <network>        Network: "devnet" or "mainnet-beta" (default: "devnet")
 
-Example:
+Environment Variables:
+  RPC_URL                    Custom RPC URL (overrides network)
+  RPC_URL_MAINNET            Mainnet RPC URL
+  RPC_URL_DEVNET             Devnet RPC URL
+  WALLET_PRIVATE_KEY         Private key as JSON array or base64
+  KEYPAIR_PATH               Path to keypair file (default: ~/.config/solana/id.json)
+
+Examples:
+  # Devnet (default)
   npm run create-token -- --name "My Token" --symbol "MTK" --amount 5000
+  
+  # Mainnet
+  npm run create-token -- --name "My Token" --symbol "MTK" --network mainnet-beta
+  
+  # With custom RPC
+  RPC_URL=https://api.mainnet-beta.solana.com npm run create-token -- --name "My Token"
   `);
   process.exit(0);
 }
@@ -147,6 +186,14 @@ for (let i = 0; i < args.length; i += 2) {
       break;
     case '--decimals':
       options.decimals = parseInt(value, 10);
+      break;
+    case '--network':
+      if (value === 'mainnet' || value === 'mainnet-beta' || value === 'devnet') {
+        options.network = value as Network;
+      } else {
+        console.error(`❌ Invalid network: ${value}. Use "devnet" or "mainnet-beta"`);
+        process.exit(1);
+      }
       break;
   }
 }

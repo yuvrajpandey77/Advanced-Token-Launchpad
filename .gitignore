@@ -36,6 +36,7 @@ yarn-error.log*
 !package.json
 !tsconfig.json
 !tsconfig.*.json
+!vercel.json
 
 # Temporary files
 *.tmp

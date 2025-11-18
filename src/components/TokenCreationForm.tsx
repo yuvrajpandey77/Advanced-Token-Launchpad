@@ -19,7 +19,7 @@ export const TokenCreationForm = () => {
   const [decimals, setDecimals] = useState<string>('9');
   const [initialSupply, setInitialSupply] = useState<string>('1000');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; message: string; mintAddress?: string; signature?: string } | null>(null);
+  const [result, setResult] = useState<{ success: boolean; message: string; mintAddress?: string; signature?: string; metadataInitCommand?: string; metadataInitialized?: boolean; metadataError?: string } | null>(null);
   const [useDefaultMetadata, setUseDefaultMetadata] = useState(true);
 
   // Fetch USDT metadata from existing token if available
@@ -102,11 +102,18 @@ export const TokenCreationForm = () => {
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('tokenCreated'));
 
+        const message = createResult.metadataInitialized
+          ? 'Token created successfully with metadata! 🎉'
+          : 'Token created successfully! Metadata initialization required.';
+        
         setResult({
           success: true,
-          message: 'Token created successfully!',
+          message,
           mintAddress: createResult.mintAddress,
           signature: createResult.signature,
+          metadataInitCommand: createResult.metadataInitCommand,
+          metadataInitialized: createResult.metadataInitialized,
+          metadataError: createResult.metadataError,
         });
         // Reset form
         if (!useDefaultMetadata) {
@@ -320,7 +327,7 @@ export const TokenCreationForm = () => {
               <div className="flex-1">
                 <p className="font-light">{result.message}</p>
                 {result.mintAddress && (
-                  <div className="mt-2 space-y-1">
+                  <div className="mt-2 space-y-2">
                     <p className="text-xs text-white/60 font-mono break-all">
                       Mint Address: {result.mintAddress}
                     </p>
@@ -336,6 +343,27 @@ export const TokenCreationForm = () => {
                         </svg>
                         View Transaction
                       </a>
+                    )}
+                    {result.metadataInitialized ? (
+                      <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                        <p className="text-xs text-green-300 font-semibold mb-2">✅ Metadata Initialized!</p>
+                        <p className="text-xs text-white/80">
+                          Your token metadata has been successfully initialized. The token should now display correctly in wallets!
+                        </p>
+                      </div>
+                    ) : result.metadataInitCommand && (
+                      <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                        <p className="text-xs text-yellow-300 font-semibold mb-2">⚠️ Initialize Metadata:</p>
+                        {result.metadataError && (
+                          <p className="text-xs text-red-300 mb-2">Error: {result.metadataError}</p>
+                        )}
+                        <p className="text-xs text-white/80 font-mono break-all bg-black/20 p-2 rounded">
+                          {result.metadataInitCommand}
+                        </p>
+                        <p className="text-xs text-white/60 mt-2">
+                          Copy and run this command in your terminal to initialize metadata for your token.
+                        </p>
+                      </div>
                     )}
                   </div>
                 )}
