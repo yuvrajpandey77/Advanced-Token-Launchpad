@@ -3,6 +3,7 @@ import {
   Transaction,
   SystemProgram,
   Keypair,
+  LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import {
   createInitializeMint2Instruction,
@@ -11,7 +12,10 @@ import {
   createMintToInstruction,
   TOKEN_2022_PROGRAM_ID,
   getMintLen,
+  ExtensionType,
+  createInitializeMetadataPointerInstruction,
 } from '@solana/spl-token';
+import { createInitializeInstruction } from '@solana/spl-token-metadata';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 
 export interface CreateTokenResult {
@@ -19,6 +23,9 @@ export interface CreateTokenResult {
   mintAddress?: string;
   signature?: string;
   error?: string;
+  metadataInitCommand?: string;
+  metadataInitialized?: boolean;
+  metadataError?: string;
 }
 
 export interface CreateTokenOptions {
@@ -59,31 +66,47 @@ export const useCreateToken = () => {
       const mintKeypair = Keypair.generate();
       const mintPublicKey = mintKeypair.publicKey;
 
-      // Calculate base mint length (no extensions)
-      const baseMintLen = getMintLen([]);
+      // For Token-2022, InitializeMint2 validates account size strictly
+      // We must create the mint with EXACTLY the size returned by getMintLen()
+      // Metadata will be initialized separately and will handle account reallocation
       
-      // Calculate rent for the mint account
-      const mintRentExemptBalance = await connection.getMinimumBalanceForRentExemption(baseMintLen);
+      // Calculate mint length with ONLY MetadataPointer extension
+      const extensions = [ExtensionType.MetadataPointer];
+      const mintLen = getMintLen(extensions);
+      
+      // Calculate rent for the base mint account
+      const mintRentExemptBalance = await connection.getMinimumBalanceForRentExemption(mintLen);
       const mintLamports = mintRentExemptBalance + 50000;
       
-      console.log('Mint account size:', baseMintLen, 'bytes');
+      console.log('Mint account size (with MetadataPointer extension):', mintLen, 'bytes');
       console.log('Mint rent:', mintRentExemptBalance / 1e9, 'SOL');
 
-      // Single transaction: Create and initialize mint
+      // Transaction 1: Create and initialize mint with MetadataPointer extension
+      // This matches the behavior of spl-token create-token --enable-metadata
       const createTransaction = new Transaction();
       
-      // Create mint account
+      // Step 1: Create mint account with EXACT size for MetadataPointer extension
       createTransaction.add(
         SystemProgram.createAccount({
           fromPubkey: publicKey,
           newAccountPubkey: mintPublicKey,
-          space: baseMintLen,
+          space: mintLen,
           lamports: mintLamports,
           programId: TOKEN_2022_PROGRAM_ID,
         })
       );
       
-      // Initialize mint
+      // Step 2: Initialize MetadataPointer extension FIRST (before mint initialization)
+      createTransaction.add(
+        createInitializeMetadataPointerInstruction(
+          mintPublicKey,
+          publicKey, // metadata authority
+          null, // metadata account (null initially, will point to mint after metadata init)
+          TOKEN_2022_PROGRAM_ID
+        )
+      );
+      
+      // Step 3: Initialize mint (after extensions are initialized)
       createTransaction.add(
         createInitializeMint2Instruction(
           mintPublicKey,
@@ -117,6 +140,71 @@ export const useCreateToken = () => {
       );
       
       console.log('✅ Token mint created successfully');
+
+      // Transaction 2: Initialize metadata separately
+      // The metadata initialization will handle reallocating the account
+      console.log('📝 Initializing metadata on-chain...');
+      
+      let metadataInitialized = false;
+      let metadataError: string | undefined = undefined;
+      const metadataInitCommand = `npm run initialize-metadata -- ${mintPublicKey.toBase58()} "${name}" "${symbol}" "${uri}"`;
+
+      try {
+        if (!signTransaction) {
+          throw new Error('Wallet does not support signing transactions');
+        }
+
+        // Create metadata initialization instruction
+        // This will reallocate the mint account to add metadata TLV
+        const metadataInstruction = createInitializeInstruction({
+          programId: TOKEN_2022_PROGRAM_ID,
+          metadata: mintPublicKey, // Metadata account is the mint itself
+          updateAuthority: publicKey,
+          mint: mintPublicKey,
+          mintAuthority: publicKey,
+          name,
+          symbol,
+          uri,
+        });
+
+        const metadataTransaction = new Transaction().add(metadataInstruction);
+        const {
+          blockhash: metadataBlockhash,
+          lastValidBlockHeight: metadataLastValidBlockHeight,
+        } = await connection.getLatestBlockhash('confirmed');
+        metadataTransaction.recentBlockhash = metadataBlockhash;
+        metadataTransaction.feePayer = publicKey;
+
+        // Sign and send metadata initialization transaction
+        const signedMetadataTransaction = await signTransaction(metadataTransaction);
+        const metadataSignature = await connection.sendRawTransaction(
+          signedMetadataTransaction.serialize(),
+          { 
+            maxRetries: 3,
+            skipPreflight: false,
+          }
+        );
+
+        await connection.confirmTransaction({
+          signature: metadataSignature,
+          blockhash: metadataBlockhash,
+          lastValidBlockHeight: metadataLastValidBlockHeight,
+        }, 'confirmed');
+
+        console.log('✅ Metadata initialized successfully');
+        console.log(`   Metadata transaction: ${metadataSignature}`);
+        metadataInitialized = true;
+      } catch (error: any) {
+        metadataError = error?.message || 'Failed to initialize metadata';
+        console.error('❌ Metadata initialization error:', metadataError);
+        
+        if (error.logs && Array.isArray(error.logs)) {
+          console.error('Transaction logs:', error.logs);
+        }
+        
+        console.log('📝 You can still initialize metadata manually using:');
+        console.log(`   ${metadataInitCommand}`);
+      }
       
       // Handle initial supply in a third transaction if needed
       if (initialSupply > 0) {
@@ -169,11 +257,14 @@ export const useCreateToken = () => {
         );
       }
       
-      // Return success with the mint address
+      // Return success with the mint address and metadata initialization status
       return {
         success: true,
         mintAddress: mintPublicKey.toBase58(),
         signature: signature, // Return the creation transaction signature
+        metadataInitCommand: metadataInitCommand, // Command to initialize metadata (fallback)
+        metadataInitialized: metadataInitialized, // Whether metadata was initialized successfully
+        metadataError: metadataError, // Error message if metadata initialization failed
       };
     } catch (error: unknown) {
       const err = error as any;
